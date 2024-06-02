@@ -20,7 +20,7 @@ def start(message):
             id INTEGER PRIMARY KEY,
             name VARCHAR(50),
             last_name VARCHAR(50),
-            numer_tel VARCHAR(50)
+            numer_tel VARCHAR(30)
             )
             ''')
     # Сохраняем изменения
@@ -31,7 +31,7 @@ def start(message):
                 id_telegram VARCHAR(30),
                 name VARCHAR(50),
                 last_name VARCHAR(50),
-                numer_tel VARCHAR(50)
+                numer_tel VARCHAR(30)
                 )
                 ''')
     # Сохраняем изменения
@@ -101,7 +101,7 @@ def user_name(message):
     connection = sqlite3.connect("users_data.db")
     cursor = connection.cursor()
     cursor.execute(
-        f'SELECT * FROM Users WHERE numer_tel = {tel} ')
+        f'SELECT * FROM Users WHERE numer_tel = "{tel}"')
     data = cursor.fetchall()
     if data == list():
         bot.send_message(
@@ -322,7 +322,6 @@ def user_add_order(call):
     data = cursor.fetchall()
     connection.commit()
     for i in data:
-        print(i)
         id_user = i[2]
         date_order = i[3]
         time_d = i[4]
@@ -332,7 +331,6 @@ def user_add_order(call):
         decor = i[8]
         text_note = i[9]
         sum_unit = i[10]
-        print(date_var_new)
     cursor.execute(
         f'INSERT INTO Order_price (datetime, id_users, term_date, time_date, cake, biscuit, '
         f'filling, decor, note, units_sum,  payment, transferred) '
@@ -434,10 +432,9 @@ def search(call):
     connection = sqlite3.connect("users_data.db")
     cursor = connection.cursor()
     cursor.execute(
-        "SELECT * FROM Order_price, Users"
+        "SELECT * FROM Order_price, Users WHERE Users.id = Order_price.id_users"
     )
     data = cursor.fetchall()
-    print(data)
     for i in data:
         bot.send_message(
             call.from_user.id, f"Номер заказа: {i[0]}\n"
@@ -471,12 +468,12 @@ def user_search(message):
     connection = sqlite3.connect("users_data.db")
     cursor = connection.cursor()
     cursor.execute(
-        f'SELECT id FROM Users WHERE numer_tel = {tel} ')
+        f'SELECT id FROM Users WHERE numer_tel = "{tel}" ')
     data = cursor.fetchall()
     for i in data:
-        id_user = i[0]
+        id_users = i[0]
     cursor.execute(
-        f'SELECT * FROM Order_price, Users WHERE id_users = {id_user} '
+        f'SELECT * FROM Order_price, Users WHERE id_users = {id_users} '
         f'AND Users.id = Order_price.id_users')
     data = cursor.fetchall()
     for i in data:
@@ -496,7 +493,6 @@ def user_search(message):
                                f"Время передачи заказа:  {i[4]}\n"
 
         )
-    print(data)
     connection.commit()
     connection.close()
 
@@ -515,7 +511,6 @@ def user_date(message):
         f'SELECT * FROM Order_price, Users WHERE term_date = "{message.text}" '
         f'AND Users.id = Order_price.id_users')
     data = cursor.fetchall()
-    print(data)
     for i in data:
         bot.send_message(
             message.chat.id,   f"Номер заказа: {i[0]}\n"
@@ -570,7 +565,6 @@ def search(call):
                                f"Время передачи заказа:  {i[4]}\n"
 
         )
-    print(data)
     connection.commit()
     connection.close()
 
@@ -592,7 +586,6 @@ def search(call):
     )
     data = cursor.fetchall()
     for i in data:
-        print(i)
         bot.send_message(
             call.from_user.id, f"Номер заказа: {i[0]}\n"
                                f"ФИО заказчика: {i[14]} {i[15]}\n" 
@@ -629,7 +622,6 @@ def user_payment_add(message):
         f"UPDATE Order_price SET payment = 'ДаОплачен' WHERE id = {id_user} AND payment = 'НетНеОплачен'"
     )
     data = cursor.fetchall()
-    print(data)
     connection.commit()
     cursor.execute(
         f"SELECT * FROM Order_price, Users WHERE Order_price.payment = '{order_price}'"
@@ -679,7 +671,6 @@ def transferred_add(message):
         f"UPDATE Order_price SET transferred = 'ДаОтдан' WHERE id = {id_user} AND transferred = 'НетНеОтдан'"
     )
     data = cursor.fetchall()
-    print(data)
     connection.commit()
     cursor.execute(
         f"SELECT * FROM Order_price, Users WHERE Order_price.transferred = '{order_price}'"
